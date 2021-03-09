@@ -1,0 +1,112 @@
+---
+- name: Simple playbook
+  hosts: node1,node2
+  gather_facts: no
+  vars:
+    isam_up: yes
+    condition: true
+  tasks:
+    - name: Ensure that python3 is installed
+      yum:
+        name: python3
+        state: present
+      become: yes
+      tags: python3
+    # - name: Start the python3 webserver
+    #   command: "python3 -m http.server 8080 "
+    #   when: isam_up
+    #   tags: python3
+    - name: Check reverse proxy
+      debug:
+        msg: "Status OK"
+      tags: reverse_proxy
+
+    - name: Restart reverse proxy
+      debug:
+        msg: "Restarting reverse proxy"
+      tags: restart_rp
+      until: "{{ condition }}"
+      retries: 3
+      delay: 2
+
+    - name: Check WebSeal
+      debug:
+        msg: "WebSeal OK"
+      tags: webseal
+
+    - name: Restart webseal
+      debug:
+        msg: "Restarting webseal"
+      tags: restart_ws
+      until: "{{ condition }}"
+      retries: 3
+      delay: 2
+
+    - name: Check NewJunction
+      debug:
+        msg: "New Junction  OK"
+      tags: new_junction
+
+    - name: Restart NewJunction
+      debug:
+        msg: "Restarting NewJunction"
+      tags: restart_nj
+      until: "{{ condition }}"
+      retries: 3
+      delay: 2
+
+    - name: Check MGA
+      uri:
+        url: "http://{{ inventory_hostname }}:8080"
+        status_code: 200
+      tags: mga
+      register: response
+      failed_when: false
+
+    - name: Restart MGA
+      debug:
+        msg: "Restarting the Junction"
+      tags: restart_mga
+      until: "{{ condition }}"
+      retries: 3
+      delay: 2
+
+    - name: Fail the MGA restart
+      fail:
+        msg: "Restarting MGA failed"
+      tags: restart_mga
+
+    - name: E2E Testing
+      debug:
+        msg: "All tests pass"
+      tags: e2e
+
+    - debug:
+        msg: "{{ response }}"
+        verbosity: 1
+      tags: mga
+
+    - name: No issues
+      debug:
+        msg: "No errors found on {{ inventory_hostname }}"
+      when: "'OK' in response.msg"
+      tags:
+        - systems_up
+        - mga
+
+    - name: Create a var to collect failed nodes
+      set_fact:
+        failed_nodes: "{{ nodes|default([]) + [ inventory_hostname ] }}"
+      when: "'OK' not in response.msg"
+      tags: mga
+
+    - name: Nodes with failures
+      set_stats:
+        data:
+          nodes: "{{ failed_nodes }}"
+      when: "'OK' not in response.msg"
+      tags: mga
+    - fail:
+        msg: some systems failed
+      when: "'OK' not in response.msg"
+      tags: mga
