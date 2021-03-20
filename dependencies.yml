@@ -12,6 +12,12 @@
 - name: Ensure Middleware
   hosts: node3
   tasks:
+    - name: Ensure Podman
+      yum:
+        name: podman
+        state: present
+      become: yes
+
     - name: Pull images
       containers.podman.podman_image:
         name: "{{ item }}"
