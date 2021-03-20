@@ -2,6 +2,7 @@
 - name: Ensure Python3
   hosts: node1,node2
   gather_facts: no
+  become: yes
   tasks:
     - name: Install python3
       yum:
