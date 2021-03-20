@@ -1,5 +1,2 @@
-  /Users/termlen0/Projects/fedora33-vagrant/middleware_podman/collections:
-  total used in directory 8 available 22.9 GiB
-  drwxr-xr-x  3 termlen0  staff   96 Mar 20 07:47 .
-  drwxr-xr-x  6 termlen0  staff  192 Mar 20 14:17 ..
-  -rw-r--r--  1 termlen0  staff   41 Mar 20 07:47 requirements.yml
+collections:
+  - name: containers.podman
