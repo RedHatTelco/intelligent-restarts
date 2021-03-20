@@ -1,0 +1,60 @@
+---
+- name: Ensure Python3
+  hosts: node1,node2
+  gather_facts: no
+  tasks:
+    - name: Install python3
+      yum:
+        name: python3
+        state: present
+
+- name: Ensure Middleware
+  hosts: node3
+  tasks:
+    - name: Pull images
+      containers.podman.podman_image:
+        name: "{{ item }}"
+        tag: latest
+      loop:
+        - 'quay.io/rralhan/intelli-infra-mysql'
+        - 'quay.io/rralhan/intelli-infra-dm'
+        - 'quay.io/rralhan/intelli-infra-fuse'
+
+    - name: Create a pod for the containers
+      containers.podman.podman_pod:
+        name: middleware
+        state: created
+        ports:
+          - "3306:3306"
+          - "8282:8282"
+          - "8080:8181"
+
+    - name: Run MySQL
+      containers.podman.podman_container:
+        image: quay.io/rralhan/intelli-infra-mysql:latest
+        name: ii-mysql
+        pod: middleware
+        state: started
+
+    - name: Run Decision Manager
+      containers.podman.podman_container:
+        image: quay.io/rralhan/intelli-infra-dm:latest
+        name: ii-dm
+        pod: middleware
+        env:
+          MYSQL_HOST: "ii-mysql"
+          MYSQL_PORT: "3306"
+        state: started
+
+    - name: Run Fuse
+      containers.podman.podman_container:
+        image: quay.io/rralhan/intelli-infra-fuse:latest
+        name: ii-fuse
+        pod: middleware
+        env:
+          MYSQL_HOST: "ii-mysql"
+          MYSQL_PORT: "3306"
+          DMSVC_HOST: "ii-dm"
+          DMSVC_PORT: "8282"
+          DMSVC_PATH: "/service/host/reboot"
+        state: started
