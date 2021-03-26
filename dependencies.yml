@@ -23,9 +23,9 @@
         name: "{{ item }}"
         tag: latest
       loop:
-        - 'quay.io/rralhan/intelli-infra-mysql'
-        - 'quay.io/rralhan/intelli-infra-dm'
-        - 'quay.io/rralhan/intelli-infra-fuse'
+        - 'quay.io/redhattelco/intelli-infra-mysql'
+        - 'quay.io/redhattelco/intelli-infra-dm'
+        - 'quay.io/redhattelco/intelli-infra-fuse'
 
     - name: Create a pod for the containers
       containers.podman.podman_pod:
@@ -38,14 +38,14 @@
 
     - name: Run MySQL
       containers.podman.podman_container:
-        image: quay.io/rralhan/intelli-infra-mysql:latest
+        image: quay.io/redhattelco/intelli-infra-mysql:latest
         name: ii-mysql
         pod: middleware
         state: started
 
     - name: Run Decision Manager
       containers.podman.podman_container:
-        image: quay.io/rralhan/intelli-infra-dm:latest
+        image: quay.io/redhattelco/intelli-infra-dm:latest
         name: ii-dm
         pod: middleware
         env:
@@ -55,7 +55,7 @@
 
     - name: Run Fuse
       containers.podman.podman_container:
-        image: quay.io/rralhan/intelli-infra-fuse:latest
+        image: quay.io/redhattelco/intelli-infra-fuse:latest
         name: ii-fuse
         pod: middleware
         env:
