@@ -51,3 +51,4 @@
       debug:
         msg: "{{ recent_nodes }}"
       when: recent_nodes is defined
+      failed_when: recent_nodes is defined
