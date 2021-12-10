@@ -50,4 +50,4 @@
     - name: Display nodes that will not be restarted
       debug:
         msg: "{{ recent_nodes }}"
-      when: recent_data is defined
+      when: recent_nodes is defined
