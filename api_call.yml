@@ -45,7 +45,7 @@
       set_fact:
         recent_nodes: "{{ nodes|default([]) + [ item.host ] }}"
       loop: "{{ return_data.json }}"
-      when: not item.restart
+      when: item.restart == 'No'
 
     - name: Display nodes that will not be restarted
       debug:
